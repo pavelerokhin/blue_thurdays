@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+
+require '../enums/vehicle_state.rb'
+
 class Vehicle
   attr_accessor :state, :type, :time_in, :time_out, :parking_place
 
