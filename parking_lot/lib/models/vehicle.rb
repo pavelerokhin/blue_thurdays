@@ -15,6 +15,7 @@ class Vehicle
     @parking_place = parking_place
     @state = VehicleState::PARKED
     @time_in = time_in
+    @time_out = time_in + rand(1..5) # it will go out in 1-5 seconds
   end
 
   def finish(time_out = Time.now)
@@ -25,8 +26,12 @@ class Vehicle
   def get_parking_time
     return unless @time_out && @time_in
 
-    parking_time_seconds = @time_out - @time_in
-    parking_time_seconds / 3600.0 # Convert seconds to hours
+    if @time_out.is_a?(Time) && @time_in.is_a?(Time)
+      @time_out - @time_in # in seconds
+    else
+      puts "Error: @time_out and @time_in must be Time objects."
+      nil
+    end
   end
 
   private
