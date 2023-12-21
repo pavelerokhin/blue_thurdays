@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Parking
-  attr_accessor :parking_space, :levels, :rows_in_level, :places_in_row
+  attr_accessor :parking_space, :levels, :rows_in_level, :places_in_row, :money
 
   def initialize(levels, rows_in_level, places_in_row)
     validate(levels, rows_in_level, places_in_row)
@@ -9,6 +9,7 @@ class Parking
     @rows_in_level = rows_in_level
     @places_in_row = places_in_row
     @parking_space = Array.new(levels) { Array.new(rows_in_level) { Array.new(places_in_row) } }
+    @money = 0
   end
 
   def park_or_refuse(vehicle)
@@ -27,8 +28,8 @@ class Parking
                   [vehicle.parking_place[1]]\
                   [vehicle.parking_place[2]..vehicle.parking_place[2]+vehicle.parking_place[3]] = nil
 
-    vehicle.pay
-    vehicle.finish
+    @money += vehicle.pay
+    vehicle.out
   end
 
   private
@@ -38,6 +39,8 @@ class Parking
       raise ArgumentError, 'Invalid parking size'
     end
   end
+
+  private
 
   def find_parking_place(vehicle_size)
     parking_size = 0
@@ -51,7 +54,7 @@ class Parking
             parking_size = 0
           end
           if parking_size == vehicle_size
-            return [level_index, row_index, place_index, parking_size]
+            return [level_index, row_index, place_index, place_index+parking_size]
           end
         }
         parking_size = 0
@@ -64,6 +67,4 @@ class Parking
     vehicle.park(parking_place)
     @parking_space[parking_place[0]][parking_place[1]][parking_place[2]] = vehicle.id
   end
-
-
 end

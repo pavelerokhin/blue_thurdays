@@ -28,5 +28,3 @@ class Queue
     @queue.empty?
   end
 end
-
-# Function to generate N random cars (types can repeat)
