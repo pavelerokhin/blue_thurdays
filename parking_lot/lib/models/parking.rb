@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Parking
-  attr_accessor :parking_space, :levels, :rows_in_level, :places_in_row, :money
+  attr_accessor :parking_space, :levels, :rows_in_level, :places_in_row, :money, :out_times
 
   def initialize(levels, rows_in_level, places_in_row)
     validate(levels, rows_in_level, places_in_row)
@@ -10,6 +10,7 @@ class Parking
     @places_in_row = places_in_row
     @parking_space = Array.new(levels) { Array.new(rows_in_level) { Array.new(places_in_row) } }
     @money = 0
+    @out_times = []
   end
 
   def park_or_refuse(vehicle)
@@ -23,11 +24,11 @@ class Parking
     end
   end
 
-  def exit_parking(vehicle)
+  def exit_parking(vehicle, out_time)
     @parking_space[vehicle.parking_place[0]]\
                   [vehicle.parking_place[1]]\
                   [vehicle.parking_place[2]..vehicle.parking_place[2]+vehicle.parking_place[3]] = nil
-
+    @out_time << out_time
     @money += vehicle.pay
     vehicle.out
   end

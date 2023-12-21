@@ -13,13 +13,28 @@ class Vehicle
   def park(parking_place, time_in = Time.now)
     @parking_place = parking_place
     @state = :parked
-    @in_time = time_in
-    @out_time = time_in + rand(1..5) # it will go out in 1-5 seconds
+    @in_time = time_in.to_time
+    @out_time ||= @in_time + rand(1..5)
+
+    loop do
+      break if @out_time.nil? || Time.now.to_time >= @out_time
+
+      sleep 1 # Adjust the sleep duration as needed
+    end
+
+    out
+  rescue => e
+    puts "Error while parking: #{e.message}"
   end
 
   def out(out_time = Time.now)
     @state = :out
     @out_time = out_time
+
+    # perform an async function that will remove the vehicle from the parking lot
+    # it should sent to the Parking class the vehicle and the out_time
+
+    Parking.exit_parking(self, out_time)
   end
 
   def pay
