@@ -2,7 +2,17 @@
 
 
 class Vehicle
-  attr_accessor :state, :time_in, :time_out, :parking_place
+  attr_accessor :state, :time_in, :time_out, :parking_place, :type, :size, :price
+
+  def initialize
+    @state = :in_queue
+    @in_time = nil
+    @out_time = nil
+    @parking_place = nil
+    @type = nil
+    @size = nil
+    @price = nil
+  end
 
   def in_queue
     @state = :in_queue
@@ -13,11 +23,11 @@ class Vehicle
   def park(parking_place, time_in = Time.now)
     @parking_place = parking_place
     @state = :parked
-    @in_time = time_in.to_time
+    @in_time = time_in
     @out_time ||= @in_time + rand(1..5)
 
     loop do
-      break if @out_time.nil? || Time.now.to_time >= @out_time
+      break if Time.now >= @out_time
 
       sleep 1 # Adjust the sleep duration as needed
     end
@@ -58,6 +68,7 @@ end
 
 class Moto < Vehicle
   def initialize
+    super
     @type = :moto
     @size = 1
     @price = 1
@@ -66,6 +77,7 @@ end
 
 class Auto < Vehicle
     def initialize
+      super
       @type = :auto
       @size = 4
       @price = 2
@@ -74,6 +86,7 @@ end
 
 class Bus < Vehicle
   def initialize
+    super
     @type = :auto
     @size = 8
     @price = 4
@@ -81,16 +94,6 @@ class Bus < Vehicle
 end
 
 def random_type_vehicle
-  type = [:moto, :auto, :bus].sample
-
-  case type
-  when :moto
-    Moto.new
-  when :auto
-    Auto.new
-  when :bus
-    Bus.new
-  else
-    raise ArgumentError, "Invalid vehicle type: #{type}"
-  end
+  [Moto, Auto, Bus].sample.new
 end
+

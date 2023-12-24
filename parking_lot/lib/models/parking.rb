@@ -15,19 +15,18 @@ class Parking
 
   def park_or_refuse(vehicle)
     # a comment here
-    parking_place = find_parking_place(vehicle.type.size)
+    parking_place = find_parking_place(vehicle.size)
     if parking_place.nil?
-      'Sorry, there are no empty places for now'
+      refuse(vehicle)
     else
       park(vehicle, parking_place)
-      "Your vehicle is parked at level #{parking_place[0] + 1}, row #{parking_place[1] + 1}, place #{parking_place[2] + 1}"
     end
   end
 
   def exit_parking(vehicle, out_time)
-    @parking_space[vehicle.parking_place[0]]\
-                  [vehicle.parking_place[1]]\
-                  [vehicle.parking_place[2]..vehicle.parking_place[2]+vehicle.parking_place[3]] = nil
+    vehicle.last.times { |i|
+      @parking_space[vehicle.parking_place[0]][vehicle.parking_place[1]][vehicle.parking_place[2] + i] = nil
+    }
     @out_time << out_time
     @money += vehicle.pay
     vehicle.out
@@ -55,7 +54,7 @@ class Parking
             parking_size = 0
           end
           if parking_size == vehicle_size
-            return [level_index, row_index, place_index, place_index+parking_size]
+            return [level_index, row_index, place_index, parking_size]
           end
         }
         parking_size = 0
@@ -66,6 +65,13 @@ class Parking
 
   def park(vehicle, parking_place)
     vehicle.park(parking_place)
-    @parking_space[parking_place[0]][parking_place[1]][parking_place[2]] = vehicle.id
+    parking_place.last.times { |i|
+      @parking_space[parking_place[0]][parking_place[1]][parking_place[2] + i] = vehicle.id
+    }
+    puts "Your vehicle is parked at level #{parking_place[0] + 1}, row #{parking_place[1] + 1}, place #{parking_place[2] + 1}"
+  end
+
+  def refuse(_)
+    puts 'Sorry, there are no empty places for now'
   end
 end
