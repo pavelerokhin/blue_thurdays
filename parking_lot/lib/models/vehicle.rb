@@ -1,17 +1,15 @@
 # frozen_string_literal: true
 
+require 'securerandom'
+
 
 class Vehicle
-  attr_accessor :state, :time_in, :time_out, :parking_place, :type, :size, :price
+  attr_accessor :state, :time_in, :time_out, :parking_place, :type, :size, :price, :id, :cashier
 
   def initialize
+    @id = SecureRandom.uuid
     @state = :in_queue
-    @in_time = nil
-    @out_time = nil
     @parking_place = nil
-    @type = nil
-    @size = nil
-    @price = nil
   end
 
   def in_queue
@@ -24,27 +22,24 @@ class Vehicle
     @parking_place = parking_place
     @state = :parked
     @in_time = time_in
-    @out_time ||= @in_time + rand(1..5)
+    @out_time ||= @in_time + rand(2..14) # TODO: make it configurable
 
-    loop do
-      break if Time.now >= @out_time
-
-      sleep 1 # Adjust the sleep duration as needed
+    Thread.new do
+      loop do
+        break unless @out_time.nil? && Time.now >= @out_time
+        sleep 0.1 # Adjust the sleep duration as needed
+      end
+      pay_and_exit
     end
-
-    out
   rescue => e
     puts "Error while parking: #{e.message}"
   end
 
-  def out(out_time = Time.now)
+  def pay_and_exit(out_time = Time.now)
     @state = :out
     @out_time = out_time
 
-    # perform an async function that will remove the vehicle from the parking lot
-    # it should sent to the Parking class the vehicle and the out_time
-
-    Parking.exit_parking(self, out_time)
+    @cashier.pay_and_exit(self, out_time)
   end
 
   def pay
@@ -54,14 +49,15 @@ class Vehicle
     end
   end
 
+  private
+
   def get_parking_time
     return unless @out_time && @in_time
 
-    if @time_out.is_a?(Time) && @in_time.is_a?(Time)
+    if @out_time.is_a?(Time) && @in_time.is_a?(Time)
       @out_time - @in_time # in seconds
     else
       puts "Error: @time_out and @in_time must be Time objects."
-      nil
     end
   end
 end

@@ -3,33 +3,35 @@
 # main.rb
 require_relative './lib/models/parking'
 require_relative './lib/models/vehicle'
-require_relative './lib/workers/ParkingWithOneQueue'
+require_relative './lib/utils'
 
 LEVELS = 2
 ROWS_IN_LEVEL = 4
 PLACES_IN_ROW = 10
+QUEUE_MAX_SIZE = 10
 
-N_VEHICLES = 10
 
-def quit_requested?
-  IO.select([$stdin], nil, nil, 0.1) && $stdin.getc == 'q'
-end
+parking = Parking.new(LEVELS, ROWS_IN_LEVEL, PLACES_IN_ROW)
+queue = Queue.new
 
-def main_loop
-  loop do
-    Time.sleep(rand(0..3))
-    puts "Looping..."
-    break if quit_requested?
+
+loop do
+  if queue.size < QUEUE_MAX_SIZE
+    refused = parking.park_or_refuse(random_type_vehicle)
+  else
+    puts "Vehicle from the queue"
+    refused = parking.park_or_refuse(queue.pop)
   end
-  puts "Exiting the loop."
+
+  unless refused.nil?
+    puts "Vehicle #{refused.id} is in the queue. Queue length is #{queue.size}"
+    queue.push(refused)
+  end
+  break if quit?
+  sleep rand(0.1..1.0)
 end
 
-parking_lot = Parking.new(LEVELS, ROWS_IN_LEVEL, PLACES_IN_ROW)
-parking = ParkingWithOneQueue.new(parking_lot)
+puts "quit"
 
-N_VEHICLES.times do
-  # Time.sleep(rand(1..2))
-  parking.park_or_refuse(random_type_vehicle)
-end
-
-puts "Total money: #{parking_lot.money}"
+puts "Total money: #{parking.money}"
+puts "Total out times: #{parking.out_times}"

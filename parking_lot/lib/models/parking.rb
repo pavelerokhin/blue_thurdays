@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-class Parking
+class Cashier
+  def pay_and_exit(vehicle, out_time)
+    raise NotImplementedError
+  end
+end
+
+class Parking < Cashier
   attr_accessor :parking_space, :levels, :rows_in_level, :places_in_row, :money, :out_times
 
   def initialize(levels, rows_in_level, places_in_row)
@@ -17,19 +23,20 @@ class Parking
     # a comment here
     parking_place = find_parking_place(vehicle.size)
     if parking_place.nil?
-      refuse(vehicle)
+      vehicle
     else
+      vehicle.cashier = self
       park(vehicle, parking_place)
     end
   end
 
-  def exit_parking(vehicle, out_time)
-    vehicle.last.times { |i|
+  def pay_and_exit(vehicle, out_time)
+    @money += vehicle.pay
+    vehicle.parking_place.last.times { |i|
       @parking_space[vehicle.parking_place[0]][vehicle.parking_place[1]][vehicle.parking_place[2] + i] = nil
     }
-    @out_time << out_time
-    @money += vehicle.pay
-    vehicle.out
+    @out_times << out_time
+    puts "Vehicle lived. Money until now: #{@money}"
   end
 
   private
@@ -39,8 +46,6 @@ class Parking
       raise ArgumentError, 'Invalid parking size'
     end
   end
-
-  private
 
   def find_parking_place(vehicle_size)
     parking_size = 0
