@@ -66,6 +66,7 @@ class Parking < Cashier
       }
       parking_size = 0
     }
+    nil
   end
 
   def park(vehicle, parking_place)

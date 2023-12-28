@@ -6,8 +6,8 @@ require_relative './lib/models/vehicle'
 require_relative './lib/utils'
 
 LEVELS = 2
-ROWS_IN_LEVEL = 4
-PLACES_IN_ROW = 10
+ROWS_IN_LEVEL = 2
+PLACES_IN_ROW = 8
 QUEUE_MAX_SIZE = 10
 
 
