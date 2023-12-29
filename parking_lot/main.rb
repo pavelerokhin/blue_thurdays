@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# websocket-server.rb
+# ParkingServer.rb
 require_relative './lib/models/parking'
 require_relative './lib/models/vehicle'
 require_relative './lib/utils'

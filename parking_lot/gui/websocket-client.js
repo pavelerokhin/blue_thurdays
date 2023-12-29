@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
     const messagesDiv = document.getElementById("messages");
-    const socket = new WebSocket("wss://localhost:51210");
+    const socket = new WebSocket("ws://localhost:51282");
+
+    debugger;
 
     // Connection opened
     socket.addEventListener("open", function (event) {
