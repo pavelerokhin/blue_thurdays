@@ -2,7 +2,7 @@
 require 'socket'
 require 'websocket/driver'
 
-class EchoServer
+class ParkingServer
   RECV_SIZE = 1024
   HOST = 'localhost'
 
@@ -40,7 +40,7 @@ class EchoServer
 
   def setup_driver_handlers(driver)
     driver.on(:connect) { driver.start }
-    driver.on(:message) { |event| driver.text(listen_parking_lot(event.data)) }
+    driver.on(:message) { |event| driver.text(listen_parking_lot) }
     driver.on(:close) { |event| handle_close_event(event) }
   end
 
@@ -85,6 +85,8 @@ def listen_parking_lot
   "parking lot data for " + Time.now.to_s
 end
 
-server = EchoServer.new(51282)
-puts "EchoServer is listening on #{server.port}"
+t0 = Time.now
+server = ParkingServer.new(51282)
+puts "ParkingServer is listening on #{server.port}"
 server.listen
+puts "ParkingServer finished listening on #{server.port}, after #{Time.now-t0}s"
