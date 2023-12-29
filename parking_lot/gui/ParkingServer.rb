@@ -29,8 +29,8 @@ class EchoServer
       i = 0
 
       loop do
-        sleep 2
-        driver.text("Number from server: #{i}")
+        sleep 1
+        driver.text(listen_parking_lot)
         i += 1
       end
     end
@@ -81,9 +81,8 @@ class EchoServer
   end
 end
 
-def listen_parking_lot(data)
-  puts "Received from client: #{data}"
-  "Received from server: hello!"
+def listen_parking_lot
+  "parking lot data for " + Time.now.to_s
 end
 
 server = EchoServer.new(51282)
