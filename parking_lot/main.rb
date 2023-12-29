@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# main.rb
+# websocket-server.rb
 require_relative './lib/models/parking'
 require_relative './lib/models/vehicle'
 require_relative './lib/utils'
@@ -16,19 +16,27 @@ queue = Queue.new
 
 
 loop do
-  if queue.size < QUEUE_MAX_SIZE
-    refused = parking.park_or_refuse(random_type_vehicle)
+  if queue.size == 0
+    vehicle = random_type_vehicle
+    puts "Vehicle from outside world: #{vehicle.type}"
   else
-    puts "Vehicle from the queue"
-    refused = parking.park_or_refuse(queue.pop)
+    vehicle = queue.pop
+    puts "Vehicle from the queue: #{vehicle.type}"
   end
+
+  refused = parking.park_or_refuse(vehicle)
 
   unless refused.nil?
     puts "Vehicle #{refused.id} is in the queue. Queue length is #{queue.size}"
     queue.push(refused)
   end
+
+  if queue.size == QUEUE_MAX_SIZE
+    puts "Queue is full. No more vehicles from the outside world allowed."
+  end
+
   break if quit?
-  sleep rand(0.1..1.0)
+  sleep rand(0.1..0.2)
 end
 
 puts "quit"
