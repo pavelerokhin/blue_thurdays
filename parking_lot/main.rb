@@ -1,44 +1,36 @@
 # frozen_string_literal: true
 
-# ParkingServer.rb
-require_relative './lib/models/parking'
-require_relative './lib/models/vehicle'
-require_relative './lib/utils'
-
-LEVELS = 2
-ROWS_IN_LEVEL = 2
-PLACES_IN_ROW = 4
-QUEUE_MAX_SIZE = 10
+require_relative './gui/GuiServer'
+require_relative './parking/parking_1_queue'
 
 
-parking = Parking.new(LEVELS, ROWS_IN_LEVEL, PLACES_IN_ROW)
-queue = Queue.new
+
 logger = Logger.new(STDOUT)
+parking = Parking1Queue.new(levels = 3,
+                            rows_in_level= 10,
+                            places_in_row = 10,
+                            queue_max_size = 100,
+                            outside_world_distribution = [0.1..1.5],
+                            parking_distribution = [1.0..2.5])
 
-loop do
 
-  vehicle = if queue.size < QUEUE_MAX_SIZE
-    vehicle = random_type_vehicle
-    queue.push(vehicle)
-    logger.info("Vehicle #{vehicle.type} from the outside world is in the queue (size: #{queue.size})")
-    queue.pop
-  else
-    logger.info("#{RED}Queue is full. No more vehicles from the outside world are allowed.#{RESET}")
-    break
+class SnapshotHandler
+  def initialize(parking)
+    @parking = parking
   end
-
-  refused = parking.park_or_refuse(vehicle)
-
-  unless refused.nil?
-    queue.push(refused)
-    logger.info("#{refused.type} is in the queue (size: #{queue.size})")
+  def get_snapshot
+    @parking.snapshot
   end
-
-  break if quit?
-  sleep rand(0.1..3.0)
 end
 
-puts "quit"
+Thread.new do
+  t0 = Time.now
+  gui_parking_server = GuiServer.new(51282, SnapshotHandler.new(parking))
+  logger.info("gui server is listening on #{gui_parking_server.addr}")
+  gui_parking_server.listen
+  logger.info("gui server finished listening on #{gui_parking_server.addr}, after #{Time.now-t0}s")
+end
 
-puts "Total money: #{parking.money}"
-puts "Total out times: #{parking.out_times}"
+sleep(1000)
+#parking.run
+

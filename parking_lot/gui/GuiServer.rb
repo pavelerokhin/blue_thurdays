@@ -2,23 +2,35 @@
 require 'socket'
 require 'websocket/driver'
 
-class ParkingServer
-  RECV_SIZE = 1024
-  HOST = 'localhost'
+class GuiServer
+  def initialize(port = nil, handler)
+    @port = port
+    @handler = handler
 
-  attr_reader :server
-
-  def initialize(port = nil)
+    @host = 'localhost'
     @server = start_server(port)
+    @recv_size = 1024
+
     @logger = Logger.new(STDOUT)
   end
 
-  def start_server(port)
-    ::TCPServer.open(HOST, port || 0)
+  def addr
+    @host + ':' + @server.addr[1].to_s
   end
 
-  def addr
-    server.addr
+  def listen
+    @logger.info("Waiting for connections on #{addr}")
+    loop do
+      client = @server.accept
+      @logger.info("Accepted connection from #{client.addr[2]}")
+      Thread.new { handle(client) }
+    end
+  end
+
+  private
+
+  def start_server(port)
+    ::TCPServer.open("0.0.0.0", port || 0)
   end
 
   def handle(socket)
@@ -28,9 +40,10 @@ class ParkingServer
     Thread.new do
       driver.start
 
-      24.times do
+      loop do
         sleep(1)
-        driver.text(listen_parking_lot)
+        driver.text(@handler.get_snapshot.to_s)
+        break if quit?
       end
 
       driver.close
@@ -49,7 +62,7 @@ class ParkingServer
     loop do
       begin
         IO.select([socket], [], [], 30) or raise Errno::EWOULDBLOCK
-        data = socket.recv(RECV_SIZE)
+        data = socket.recv(@recv_size)
         break if data.empty?
         driver.parse(data)
       rescue Errno::EWOULDBLOCK, Errno::EAGAIN
@@ -70,22 +83,5 @@ class ParkingServer
   
     @logger.info(connection_msg)
   end
-
-  def listen
-    loop do
-      client = server.accept
-      @logger.info("Accepted connection from #{client.addr[2]}")
-      Thread.new { handle(client) }
-    end
-  end
 end
 
-def listen_parking_lot
-  "parking lot data for " + Time.now.to_s
-end
-
-t0 = Time.now
-server = ParkingServer.new(51282)
-puts "ParkingServer is listening on #{server.addr}"
-server.listen
-puts "ParkingServer finished listening on #{server.addr}, after #{Time.now-t0}s"

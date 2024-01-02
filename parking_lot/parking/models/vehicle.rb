@@ -7,10 +7,11 @@ class Vehicle
   attr_accessor :cashier
   attr_reader  :parking_place, :id, :type, :size, :price
 
-  def initialize
+  def initialize(parking_distribution)
     @id ||= SecureRandom.uuid
     @state = :in_queue
     @parking_place = nil
+    @parking_distribution = parking_distribution
 
     @logger ||= Logger.new(STDOUT)
   end
@@ -20,11 +21,11 @@ class Vehicle
     @parking_hours = nil
   end
 
-  def park(parking_place, parking_hours = rand(2..14), in_time = Time.now)
+  def park(parking_place, in_time = Time.now)
     @parking_place = parking_place
     @state = :parked
     @time_in = in_time
-    @parking_hours = parking_hours
+    @parking_hours = rand(*@parking_distribution).round(1)
 
     Thread.new do
       sleep @parking_hours
@@ -56,8 +57,8 @@ class Vehicle
 end
 
 class Moto < Vehicle
-  def initialize
-    super
+  def initialize(parking_distribution)
+    super(parking_distribution)
     @type = :moto
     @size = 1
     @price = 1
@@ -65,8 +66,8 @@ class Moto < Vehicle
 end
 
 class Auto < Vehicle
-    def initialize
-      super
+    def initialize(parking_distribution)
+      super(parking_distribution)
       @type = :auto
       @size = 4
       @price = 2
@@ -74,15 +75,15 @@ class Auto < Vehicle
 end
 
 class Bus < Vehicle
-  def initialize
-    super
+  def initialize(parking_distribution)
+    super(parking_distribution)
     @type = :auto
     @size = 8
     @price = 4
   end
 end
 
-def random_type_vehicle
-  [Moto, Auto, Bus].sample.new
+def random_type_vehicle(parking_distribution)
+  [Moto, Auto, Bus].sample.new(parking_distribution)
 end
 
