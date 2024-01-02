@@ -4,25 +4,26 @@ require 'securerandom'
 
 
 class Vehicle
-  attr_accessor :state, :time_in, :time_out, :parking_place, :type, :size, :price, :id, :cashier
+  attr_accessor :cashier
+  attr_reader  :parking_place, :id, :type, :size, :price
 
   def initialize
-    @id = SecureRandom.uuid
+    @id ||= SecureRandom.uuid
     @state = :in_queue
     @parking_place = nil
+
+    @logger ||= Logger.new(STDOUT)
   end
 
   def in_queue
     @state = :in_queue
-    @in_time = nil
-    @out_time = nil
     @parking_hours = nil
   end
 
   def park(parking_place, parking_hours = rand(2..14), in_time = Time.now)
     @parking_place = parking_place
     @state = :parked
-    @in_time = in_time
+    @time_in = in_time
     @parking_hours = parking_hours
 
     Thread.new do
@@ -31,10 +32,10 @@ class Vehicle
     end
   end
 
-  def pay_and_exit(out_time = Time.now)
+  def pay_and_exit(time_out = Time.now)
     @state = :out
-    @out_time = out_time
-    @cashier.pay_and_exit(self, out_time)
+    @time_out = time_out
+    @cashier.pay_and_exit(self, time_out)
   end
 
   def pay
@@ -44,12 +45,12 @@ class Vehicle
   private
 
   def get_parking_time
-    return unless @parking_hours && @in_time
+    return unless @parking_hours && @time_in
 
-    if @parking_hours.is_a?(Time) && @in_time.is_a?(Time)
-      @parking_hours - @in_time # in seconds
+    if @parking_hours.is_a?(Time) && @time_in.is_a?(Time)
+      @parking_hours - @time_out # in seconds
     else
-      puts "Error: @time_out and @in_time must be Time objects."
+      logger.error("Error: @time_out and @in_time must be Time objects")
     end
   end
 end

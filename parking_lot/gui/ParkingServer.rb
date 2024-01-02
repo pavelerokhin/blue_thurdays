@@ -10,14 +10,15 @@ class ParkingServer
 
   def initialize(port = nil)
     @server = start_server(port)
+    @logger = Logger.new(STDOUT)
   end
 
   def start_server(port)
     ::TCPServer.open(HOST, port || 0)
   end
 
-  def port
-    server.addr[1]
+  def addr
+    server.addr
   end
 
   def handle(socket)
@@ -26,13 +27,13 @@ class ParkingServer
 
     Thread.new do
       driver.start
-      i = 0
 
-      loop do
-        sleep 1
+      24.times do
+        sleep(1)
         driver.text(listen_parking_lot)
-        i += 1
       end
+
+      driver.close
     end
 
     process_socket_data(socket, driver)
@@ -51,11 +52,11 @@ class ParkingServer
         data = socket.recv(RECV_SIZE)
         break if data.empty?
         driver.parse(data)
-      rescue Errno::EAGAIN
+      rescue Errno::EWOULDBLOCK, Errno::EAGAIN
         # Resource temporarily unavailable, continue the loop
         next
       rescue Errno::ECONNRESET
-        puts "Connection reset by the client"
+        @logger.error("Connection reset by the client")
         break # exit the loop or add your logic for handling the reset
       end
     end
@@ -65,17 +66,15 @@ class ParkingServer
     driver = event.instance_variable_get(:@driver)
     socket = driver.instance_variable_get(:@socket)
 
-    if socket
-      puts "Connection with #{socket.addr[2]} closed. Code: #{event.code}, Reason: #{event.reason}"
-    else
-      puts "Connection closed. Code: #{event.code}, Reason: #{event.reason}"
-    end
+    connection_msg = "Connection #{socket ? "with #{socket.addr[2]}" : ''} closed. Code: #{event.code}, Reason: #{event.reason}"
+  
+    @logger.info(connection_msg)
   end
 
   def listen
     loop do
       client = server.accept
-      puts "Accepted connection from #{client.addr[2]}"
+      @logger.info("Accepted connection from #{client.addr[2]}")
       Thread.new { handle(client) }
     end
   end
@@ -87,6 +86,6 @@ end
 
 t0 = Time.now
 server = ParkingServer.new(51282)
-puts "ParkingServer is listening on #{server.port}"
+puts "ParkingServer is listening on #{server.addr}"
 server.listen
-puts "ParkingServer finished listening on #{server.port}, after #{Time.now-t0}s"
+puts "ParkingServer finished listening on #{server.addr}, after #{Time.now-t0}s"
