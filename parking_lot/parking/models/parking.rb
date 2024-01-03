@@ -1,30 +1,25 @@
 # frozen_string_literal: true
 
 
-require "logger"
+require 'logger'
 
+require_relative 'cashier'
+require_relative 'parking_receipt'
+require_relative 'vehicle'
 
-class Cashier
-  def pay_and_exit(vehicle, out_time)
-    raise NotImplementedError
-  end
-end
 
 class Parking < Cashier
+
   attr_accessor :parking_space, :money, :out_times
-  attr_reader :levels, :rows_in_level, :places_in_row
 
   def initialize(levels, rows_in_level, places_in_row)
     validate(levels, rows_in_level, places_in_row)
-    @levels = levels
-    @rows_in_level = rows_in_level
-    @places_in_row = places_in_row
     @parking_space = Array.new(levels) { Array.new(rows_in_level) { Array.new(places_in_row) } }
     @money = 0
     @out_times = []
 
-    @logger = Logger.new(STDOUT)
     @mutex = Mutex.new
+    @logger = Logger.new(STDOUT, progname: 'parking')
   end
 
   def park_or_refuse(vehicle)
@@ -34,22 +29,24 @@ class Parking < Cashier
       return refuse(vehicle)
     end
 
+    # park
     vehicle.cashier = self
     park(vehicle, parking_place)
     nil
   end
 
-  def pay_and_exit(vehicle, out_time)
-    @money += vehicle.pay
-    @out_times << out_time
+  def pay_and_exit(vehicle)
+    @money += vehicle.receipt.how_much_to_pay
+    @out_times << vehicle.receipt.out_time
     clear_parking_space(vehicle)
-    @logger.info("#{YELLOW}#{vehicle.type} left. Money until now: #{@money}#{RESET}")
+    @logger.info("#{YELLOW}#{vehicle.type} left. Money until now: #{@money.round(2)}#{RESET}")
   end
 
   private
 
   def validate(levels, rows_in_level, places_in_row)
-    raise ArgumentError, 'Invalid parking size' if [levels, rows_in_level, places_in_row].any? { |val| val < 1 }
+    raise ArgumentError, "#{RED}Not a valid parking size, should be a triple of positive integers#{RESET}" \
+      if [levels, rows_in_level, places_in_row].any? { |val| val < 1 and !val.is_a?(Integer) }
   end
 
   def find_parking_place(vehicle_size)
@@ -80,16 +77,16 @@ class Parking < Cashier
 
   def occupy_parking_space(vehicle)
     @mutex.synchronize do
-      vehicle.parking_place.last.times do |i|
-        @parking_space[vehicle.parking_place[0]][vehicle.parking_place[1]][vehicle.parking_place[2] + i] = vehicle.id
+      vehicle.receipt.parking_place.last.times do |i|
+        @parking_space[vehicle.receipt.parking_place[0]][vehicle.receipt.parking_place[1]][vehicle.receipt.parking_place[2] + i] = vehicle.id
       end
     end
   end
 
   def clear_parking_space(vehicle)
     @mutex.synchronize do
-      vehicle.parking_place.last.times do |i|
-        @parking_space[vehicle.parking_place[0]][vehicle.parking_place[1]][vehicle.parking_place[2] + i] = nil
+      vehicle.receipt.parking_place.last.times do |i|
+        @parking_space[vehicle.receipt.parking_place[0]][vehicle.receipt.parking_place[1]][vehicle.receipt.parking_place[2] + i] = nil
       end
     end
   end

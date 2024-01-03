@@ -28,11 +28,11 @@ end
 
 # open chrome browser with the gui ./gui/index.html
 gui_path = File.expand_path('./gui/index.html')
-
+system("open -a Chrome #{gui_path}")
 # Open Chrome browser with the GUI
-Launchy.open("file://#{gui_path}", :browser => 'google-chrome')
+# Launchy.open("file://#{gui_path}", :browser => 'google-chrome')
 
-sleep(10)
+sleep(1)
 
 # run the simulation
 parking.run

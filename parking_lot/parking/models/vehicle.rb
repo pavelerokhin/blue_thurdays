@@ -3,88 +3,74 @@
 
 require 'securerandom'
 
+require_relative 'parking_receipt'
 
 class Vehicle
   attr_accessor :cashier
-  attr_reader  :parking_place, :id, :type, :size, :price
+  attr_reader :id, :type, :size, :receipt
 
-  def initialize(parking_distribution)
-    @id ||= SecureRandom.uuid
+  def initialize(leave_parking_hours_distribution)
+    @id = self.class.next_id
     @state = :in_queue
-    @parking_place = nil
-    @parking_distribution = parking_distribution
-
-    @logger ||= Logger.new(STDOUT)
-  end
-
-  def in_queue
-    @state = :in_queue
-    @parking_hours = nil
+    @receipt = ParkingReceipt.new
+    @leave_parking_hours_distribution = leave_parking_hours_distribution
   end
 
   def park(parking_place, in_time = Time.now)
-    @parking_place = parking_place
     @state = :parked
-    @time_in = in_time
-    @parking_hours = rand(*@parking_distribution).round(1)
+    receipt.in_time = in_time
+    receipt.parking_place = parking_place
+    receipt.parking_hours = rand(*@leave_parking_hours_distribution).round(2)
 
     Thread.new do
-      sleep @parking_hours
+      sleep receipt.parking_hours
       pay_and_exit
     end
   end
 
-  def pay_and_exit(time_out = Time.now)
+  def pay_and_exit(out_time = Time.now)
     @state = :out
-    @time_out = time_out
-    @cashier.pay_and_exit(self, time_out)
+    receipt.out_time = out_time
+    cashier.pay_and_exit(self)
   end
 
-  def pay
-    @parking_hours * @price
-  end
-
-  private
-
-  def get_parking_time
-    return unless @parking_hours && @time_in
-
-    if @parking_hours.is_a?(Time) && @time_in.is_a?(Time)
-      @parking_hours - @time_out # in seconds
-    else
-      logger.error("Error: @time_out and @in_time must be Time objects")
-    end
+  def self.next_id
+    @last_id ||= 0
+    @last_id += 1
   end
 end
 
 class Moto < Vehicle
-  def initialize(parking_distribution)
-    super(parking_distribution)
+  def initialize(leave_parking_hours_distribution)
+    super(leave_parking_hours_distribution)
+    @id = "moto-#{@id}"
     @type = :moto
     @size = 1
-    @price = 1
+    receipt.price = 1
   end
 end
 
 class Auto < Vehicle
-    def initialize(parking_distribution)
-      super(parking_distribution)
+    def initialize(leave_parking_hours_distribution)
+      super(leave_parking_hours_distribution)
+      @id = "auto-#{@id}"
       @type = :auto
       @size = 4
-      @price = 2
-  end
+      receipt.price = 2
+    end
 end
 
 class Bus < Vehicle
-  def initialize(parking_distribution)
-    super(parking_distribution)
-    @type = :auto
+  def initialize(leave_parking_hours_distribution)
+    super(leave_parking_hours_distribution)
+    @id = "bus-#{@id}"
+    @type = :bus
     @size = 8
-    @price = 4
+    receipt.price = 4
   end
 end
 
-def random_type_vehicle(parking_distribution)
-  [Moto, Auto, Bus].sample.new(parking_distribution)
+def random_type_vehicle(leave_parking_hours_distribution)
+  [Moto, Auto, Bus].sample.new(leave_parking_hours_distribution)
 end
 

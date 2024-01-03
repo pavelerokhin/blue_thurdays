@@ -10,17 +10,17 @@ class Parking1Queue
                  rows_in_level=4,
                  places_in_row=10,
                  queue_max_size = 10,
-                 outside_world_distribution = [0.1..1.5],
-                 parking_distribution = [1.0..2.5])
+                 vehicles_arrive_hours_distribution = [0.1..1.5],
+                 leave_parking_hours_distribution = [1.0..2.5])
+    @logger = Logger.new(STDOUT, progname: 'queue')
+    @mutex = Mutex.new
+
     @max_queue_size = queue_max_size
-    @outside_world_distribution = outside_world_distribution
-    @parking_distribution = parking_distribution
+    @vehicles_arrive_hours_distribution = vehicles_arrive_hours_distribution
+    @leave_parking_hours_distribution = leave_parking_hours_distribution
 
     @parking = Parking.new(levels, rows_in_level, places_in_row)
     @queue = Queue.new
-
-    @mutex = Mutex.new
-    @logger = Logger.new(STDOUT)
 
     @logger.info("#{GREEN}parking with one queue is ready#{RESET}")
   end
@@ -28,26 +28,26 @@ class Parking1Queue
   def run
     loop do
       # vehicles coming from the outside world and enter the queue
-      vehicle = if @queue.size < @max_queue_size
-        vehicle = random_type_vehicle(@parking_distribution)
-        @queue.push(vehicle)
-        @logger.info("#{vehicle.type} from the outside world is in the queue (size: #{@queue.size})")
-        @queue.pop
-      else
+      if @queue.size == @max_queue_size
         @logger.info("#{RED}QUEUE IS FULL. No more vehicles from the outside world are allowed.#{RESET}")
         break
       end
 
-      refused = @parking.park_or_refuse(vehicle)
+      @queue.push(random_type_vehicle(@vehicles_arrive_hours_distribution))
+      vehicle = @queue.pop
+      @logger.info("#{vehicle.type} from the outside world #{if @queue.size > 0 then "is in the queue #{MAGENTA}(size: #{@queue.size})#{RESET}" end}")
 
+      refused = @parking.park_or_refuse(vehicle)
       unless refused.nil?
+        @logger.info("#{refused.type} has been refused and pushed is in the queue #{MAGENTA}(size: #{@queue.size})#{RESET}") if @queue.size > 1
         @queue.push(refused)
-        @logger.info("#{refused.type} has been refused and pushed is in the queue (size: #{@queue.size})") if @queue.size > 1
       end
 
       @logger.info("#{RED}quit simulation with Q pressed#{RESET}") && break if quit?
 
-      sleep rand(*@outside_world_distribution)
+      wait_for_next_vehicle = rand(*@vehicles_arrive_hours_distribution)
+      sleep wait_for_next_vehicle
+      @logger.info("next vehicle from the outside world arrived in #{wait_for_next_vehicle.round(2)} hours")
     end
 
     display_statistics
@@ -67,7 +67,10 @@ class Parking1Queue
   private
 
   def display_statistics
-    @logger.info("#{LIGHT_YELLOW}Total money: #{@parking.money}")
-    @logger.info("# vehicles served: #{@parking.out_times.length}#{RESET}")
+    @logger.info("#{LIGHT_YELLOW}*******************************")
+    @logger.info(" - Total money: #{@parking.money}")
+    @logger.info(" - Vehicles served: #{@parking.out_times.length}")
+    @logger.info("*******************************#{RESET}")
+
   end
 end

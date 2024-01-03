@@ -2,10 +2,11 @@
 
 
 GREEN = "\e[32m"
+LIGHT_YELLOW = "\e[93m"
+MAGENTA = "\e[35m"
 RED = "\e[31m"
 RESET = "\e[0m"
 YELLOW = "\e[33m"
-LIGHT_YELLOW = "\e[93m"
 
 
 def quit?
