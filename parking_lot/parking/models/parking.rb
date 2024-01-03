@@ -3,6 +3,7 @@
 
 require "logger"
 
+
 class Cashier
   def pay_and_exit(vehicle, out_time)
     raise NotImplementedError

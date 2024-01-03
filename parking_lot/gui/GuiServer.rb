@@ -1,6 +1,9 @@
-#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+
 require 'socket'
 require 'websocket/driver'
+
 
 class GuiServer
   def initialize(port = nil, handler)

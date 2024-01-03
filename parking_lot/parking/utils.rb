@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+
 GREEN = "\e[32m"
 RED = "\e[31m"
 RESET = "\e[0m"
 YELLOW = "\e[33m"
 LIGHT_YELLOW = "\e[93m"
+
 
 def quit?
   begin
