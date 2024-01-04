@@ -52,13 +52,15 @@ class Parking < Cashier
   def find_parking_place(vehicle_size)
     parking_size = 0
 
-    @parking_space.each_with_index do |level, level_index|
-      level.each_with_index do |row, row_index|
-        row.each_with_index do |place, place_index|
-          place.nil? ? parking_size += 1 : parking_size = 0
-          return [level_index, row_index, place_index, parking_size] if parking_size == vehicle_size
+    @mutex.synchronize do
+      @parking_space.each_with_index do |level, level_index|
+        level.each_with_index do |row, row_index|
+          row.each_with_index do |place, place_index|
+            place.nil? ? parking_size += 1 : parking_size = 0
+            return [level_index, row_index, place_index, parking_size] if parking_size == vehicle_size
+          end
+          parking_size = 0
         end
-        parking_size = 0
       end
     end
     nil
@@ -71,7 +73,7 @@ class Parking < Cashier
   end
 
   def refuse(vehicle)
-    @logger.info("There are no place for a #{vehicle.type}")
+    @logger.info("there are no place for a #{vehicle.type}")
     vehicle
   end
 

@@ -38,8 +38,8 @@ class Parking1Queue
 
       refused = @parking.park_or_refuse(vehicle)
       unless refused.nil?
+        @queue << refused
         @logger.info("#{refused.type} has been refused and pushed is in the queue #{MAGENTA}(size: #{@queue.size})#{RESET}") if @queue.size > 1
-        @queue.push(refused)
       end
 
       @logger.info("#{RED}quit simulation with Q pressed#{RESET}") && break if quit?

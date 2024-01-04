@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-
+require 'json'
 require 'socket'
 require 'websocket/driver'
 
@@ -21,7 +21,7 @@ class GuiServer
     @host + ':' + @server.addr[1].to_s
   end
 
-  def listen
+  def listen_and_serve
     @logger.info("Waiting for connections on #{addr}")
     loop do
       client = @server.accept
@@ -45,7 +45,7 @@ class GuiServer
 
       loop do
         sleep(1)
-        driver.text(@handler.get_snapshot.to_s)
+        driver.text(@handler.get_snapshot.to_json)
         break if quit?
       end
 
@@ -57,7 +57,7 @@ class GuiServer
 
   def setup_driver_handlers(driver)
     driver.on(:connect) { driver.start }
-    driver.on(:message) { |event| driver.text(listen_parking_lot) }
+    driver.on(:message) { |event| driver.text(listen_and_serve) }
     driver.on(:close) { |event| handle_close_event(event) }
   end
 
