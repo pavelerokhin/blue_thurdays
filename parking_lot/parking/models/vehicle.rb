@@ -20,7 +20,7 @@ class Vehicle
     @state = :parked
     receipt.in_time = in_time
     receipt.parking_place = parking_place
-    receipt.parking_hours = rand(*@leave_parking_hours_distribution).round(2)
+    receipt.parking_hours = rand(@leave_parking_hours_distribution).round(2)
 
     Thread.new do
       sleep receipt.parking_hours

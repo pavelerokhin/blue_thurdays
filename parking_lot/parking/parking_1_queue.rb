@@ -6,12 +6,12 @@ require_relative './utils'
 
 
 class Parking1Queue
-  def initialize(levels=3,
-                 rows_in_level=4,
-                 places_in_row=10,
-                 queue_max_size = 10,
-                 vehicles_arrive_hours_distribution = [0.1..1.5],
-                 leave_parking_hours_distribution = [1.0..2.5])
+  def initialize(levels,
+                 rows_in_level,
+                 places_in_row,
+                 queue_max_size,
+                 vehicles_arrive_hours_distribution,
+                 leave_parking_hours_distribution)
     @logger = Logger.new(STDOUT, progname: 'queue')
     @mutex = Mutex.new
 
@@ -33,9 +33,8 @@ class Parking1Queue
         break
       end
 
-      @queue.push(random_type_vehicle(@vehicles_arrive_hours_distribution))
+      @queue.push(random_type_vehicle(@leave_parking_hours_distribution))
       vehicle = @queue.pop
-      @logger.info("#{vehicle.type} from the outside world #{if @queue.size > 0 then "is in the queue #{MAGENTA}(size: #{@queue.size})#{RESET}" end}")
 
       refused = @parking.park_or_refuse(vehicle)
       unless refused.nil?
@@ -45,7 +44,7 @@ class Parking1Queue
 
       @logger.info("#{RED}quit simulation with Q pressed#{RESET}") && break if quit?
 
-      wait_for_next_vehicle = rand(*@vehicles_arrive_hours_distribution)
+      wait_for_next_vehicle = rand(@vehicles_arrive_hours_distribution)
       sleep wait_for_next_vehicle
       @logger.info("next vehicle from the outside world arrived in #{wait_for_next_vehicle.round(2)} hours")
     end
@@ -68,7 +67,7 @@ class Parking1Queue
 
   def display_statistics
     @logger.info("#{LIGHT_YELLOW}*******************************")
-    @logger.info(" - Total money: #{@parking.money}")
+    @logger.info(" - Total money: #{@parking.money.round(2)}")
     @logger.info(" - Vehicles served: #{@parking.out_times.length}")
     @logger.info("*******************************#{RESET}")
 

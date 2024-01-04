@@ -9,12 +9,12 @@ require_relative './parking/parking_1_queue'
 
 logger = Logger.new(STDOUT)
 
-parking = Parking1Queue.new(levels = 3,
-                            rows_in_level= 10,
-                            places_in_row = 10,
-                            queue_max_size = 100,
-                            outside_world_distribution = [0.1..1.5],
-                            parking_distribution = [1.0..2.5])
+parking = Parking1Queue.new(levels = 1,
+                            rows_in_level= 2,
+                            places_in_row = 8,
+                            queue_max_size = 10,
+                            vehicles_arrive_hours_distribution = 0.1..0.2,
+                            leave_parking_hours_distribution = 5.0..7.5)
 
 Thread.new do
   t0 = Time.now

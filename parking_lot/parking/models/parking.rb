@@ -39,7 +39,7 @@ class Parking < Cashier
     @money += vehicle.receipt.how_much_to_pay
     @out_times << vehicle.receipt.out_time
     clear_parking_space(vehicle)
-    @logger.info("#{YELLOW}#{vehicle.type} left. Money until now: #{@money.round(2)}#{RESET}")
+    @logger.info("#{YELLOW}#{vehicle.type} left after #{vehicle.receipt.parking_hours} hours. Money until now: #{@money.round(2)}#{RESET}")
   end
 
   private
