@@ -38,6 +38,15 @@ class Vehicle
     @last_id ||= 0
     @last_id += 1
   end
+
+  def snapshot
+    {
+      'id': @id,
+      'type': @type,
+      'size': @size,
+      'state': @state,
+    }
+  end
 end
 
 class Moto < Vehicle

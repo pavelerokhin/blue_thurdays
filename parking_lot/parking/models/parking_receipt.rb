@@ -6,4 +6,14 @@ class ParkingReceipt
   def how_much_to_pay
     parking_hours * price
   end
+
+  def snapshot
+    {
+      'parking_place': @parking_place,
+      'parking_hours': @parking_hours,
+      'price': @price,
+      'in_time': @in_time,
+      'out_time': @out_time,
+    }
+  end
 end

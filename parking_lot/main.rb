@@ -3,38 +3,26 @@
 require 'open-uri'
 require 'launchy'
 
-require_relative './gui/GuiServer'
-require_relative './gui/ParkingSnapshotHandler'
+require_relative './gui/backend/gui_server'
 require_relative './parking/parking_1_queue'
 
 
 logger = Logger.new(STDOUT)
 
-parking = Parking1Queue.new(levels = 1,
-                            rows_in_level=2,
-                            places_in_row = 8,
-                            queue_max_size = 20,
-                            vehicles_arrive_hours_distribution = 0.5..1.2,
-                            leave_parking_hours_distribution = 1.5..2.5)
+parking_with_1_queue = Parking1Queue.new(levels = 1,
+                            rows_in_level=5,
+                            places_in_row = 10,
+                            queue_max_size = 50,
+                            vehicles_arrive_hours_distribution = 0.1..0.2,
+                            leave_parking_hours_distribution = 7.5..8.5)
 
-Thread.new do
-  t0 = Time.now
+gui_server = GuiServer.new(parking = parking_with_1_queue,
+                           port = 51282,
+                           gui_path = "./gui/frontend/index.html")
+gui_server.open_browser
+gui_server.listen_and_serve
 
-  gui_parking_server = GuiServer.new(51282, ParkingSnapshotHandler.new(parking))
-  logger.info("gui server is listening on #{gui_parking_server.addr}")
-
-  gui_parking_server.listen_and_serve
-  logger.info("gui server finished listening on #{gui_parking_server.addr}, after #{Time.now-t0}s")
-end
-
-# open chrome browser with the gui ./gui/index.html
-gui_path = File.expand_path('./gui/index.html')
-system("open -a 'Google Chrome' #{gui_path}")
-# Open Chrome browser with the GUI
-# Launchy.open("file://#{gui_path}", :browser => 'google-chrome')
-
-sleep(2) # while the browser is opening
+sleep(2) # wait while the browser is opening
 
 # run the simulation
-parking.run
-
+parking_with_1_queue.run

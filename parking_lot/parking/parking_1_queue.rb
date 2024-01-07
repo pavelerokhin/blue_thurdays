@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative './models/parking'
+require_relative './models/parking_queue'
 require_relative './models/vehicle'
 require_relative './utils'
 
@@ -12,15 +13,13 @@ class Parking1Queue
                  queue_max_size,
                  vehicles_arrive_hours_distribution,
                  leave_parking_hours_distribution)
-    @logger = Logger.new(STDOUT, progname: 'queue')
-    @mutex = Mutex.new
+    @logger = Logger.new(STDOUT, progname: 'model')
 
-    @max_queue_size = queue_max_size
     @vehicles_arrive_hours_distribution = vehicles_arrive_hours_distribution
     @leave_parking_hours_distribution = leave_parking_hours_distribution
 
-    @parking = Parking.new(levels, rows_in_level, places_in_row)
-    @queue = Queue.new
+    @parking_1_queue = Parking.new(levels, rows_in_level, places_in_row)
+    @queue = ParkingQueue.new(queue_max_size)
 
     @logger.info("#{GREEN}parking with one queue is ready#{RESET}")
   end
@@ -28,19 +27,13 @@ class Parking1Queue
   def run
     loop do
       # vehicles coming from the outside world and enter the queue
-      if @queue.size == @max_queue_size
-        @logger.info("#{RED}QUEUE IS FULL. No more vehicles from the outside world are allowed.#{RESET}")
+      unless @queue.push(random_type_vehicle(@leave_parking_hours_distribution))
         break
       end
-
-      @queue.push(random_type_vehicle(@leave_parking_hours_distribution))
       vehicle = @queue.pop
 
-      refused = @parking.park_or_refuse(vehicle)
-      unless refused.nil?
-        @queue << refused
-        @logger.info("#{refused.type} has been refused and pushed is in the queue #{MAGENTA}(size: #{@queue.size})#{RESET}") if @queue.size > 1
-      end
+      refused = @parking_1_queue.park_or_refuse(vehicle)
+      @queue.push(refused)
 
       @logger.info("#{RED}quit simulation with Q pressed#{RESET}") && break if quit?
 
@@ -53,22 +46,18 @@ class Parking1Queue
   end
 
   def snapshot
-    @mutex.synchronize do
-      return {
-        'parking_space': @parking.parking_space,
-        'queue': @queue.size,
-        'money': @parking.money,
-        'out_times': @parking.out_times
-      }
-    end
+    {
+      'parking': @parking_1_queue.snapshot,
+      'queue': @queue.snapshot,
+    }
   end
 
   private
 
   def display_statistics
     @logger.info("#{LIGHT_YELLOW}*******************************")
-    @logger.info(" - Total money: #{@parking.money.round(2)}")
-    @logger.info(" - Vehicles served: #{@parking.out_times.length}")
+    @logger.info(" - Total money: #{@parking_1_queue.money.round(2)}")
+    @logger.info(" - Vehicles served: #{@parking_1_queue.out_times.length}")
     @logger.info("*******************************#{RESET}")
 
   end

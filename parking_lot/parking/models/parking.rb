@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 require 'logger'
 
 require_relative 'cashier'
@@ -10,7 +9,7 @@ require_relative 'vehicle'
 
 class Parking < Cashier
 
-  attr_accessor :parking_space, :money, :out_times
+  attr_accessor :parking_space, :money, :out_times, :mutex
 
   def initialize(levels, rows_in_level, places_in_row)
     validate(levels, rows_in_level, places_in_row)
@@ -40,6 +39,17 @@ class Parking < Cashier
     @out_times << vehicle.receipt.out_time
     clear_parking_space(vehicle)
     @logger.info("#{YELLOW}#{vehicle.type} left after #{vehicle.receipt.parking_hours} hours. Money until now: #{@money.round(2)}#{RESET}")
+  end
+
+  def snapshot
+      {
+        'parking_space': @parking_space,
+        'money': @money,
+        'vehicles': @out_times.length,
+        'levels': @parking_space.length,
+        'rows_in_level': @parking_space[0].length,
+        'places_in_row': @parking_space[0][0].length,
+      }
   end
 
   private
@@ -79,17 +89,21 @@ class Parking < Cashier
 
   def occupy_parking_space(vehicle)
     @mutex.synchronize do
+      sleep(0.2)
       vehicle.receipt.parking_place.last.times do |i|
-        @parking_space[vehicle.receipt.parking_place[0]][vehicle.receipt.parking_place[1]][vehicle.receipt.parking_place[2] + i] = vehicle.id
+        @parking_space[vehicle.receipt.parking_place[0]][vehicle.receipt.parking_place[1]][vehicle.receipt.parking_place[2] - i] = vehicle.id
       end
+      sleep(0.2)
     end
   end
 
   def clear_parking_space(vehicle)
     @mutex.synchronize do
+      sleep(0.2)
       vehicle.receipt.parking_place.last.times do |i|
-        @parking_space[vehicle.receipt.parking_place[0]][vehicle.receipt.parking_place[1]][vehicle.receipt.parking_place[2] + i] = nil
+        @parking_space[vehicle.receipt.parking_place[0]][vehicle.receipt.parking_place[1]][vehicle.receipt.parking_place[2] - i] = nil
       end
+      sleep(0.2)
     end
   end
 end

@@ -22,25 +22,42 @@ h1 {
     flex-direction: column;
     justify-content: center;
     min-height: 50px;
-    width: 50%;
 }
 
 .level {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    margin: 1rem 0;
+}
+
+.level-name {
+    font-size: 1.5rem;
+    font-weight: 500;
 }
 
 .row {
     display: flex;
-    flex-direction: row;
     justify-content: center;
 }
 
-.place {
+.row-name {
+    font-size: 0.7rem;
+    font-weight: 300;
+}
+
+.place, .queue-place {
     border: 1px solid #000;
+    font-size: small;
+    font-weight: 300;
     height: 50px;
+    line-height: 50px;
+    text-align: center;
     width: 50px;
+}
+
+.queue-content {
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .auto {
@@ -49,6 +66,7 @@ h1 {
 
 .bus {
     background-color: blue;
+    color: azure;
 }
 
 .moto {
