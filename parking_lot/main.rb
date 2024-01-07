@@ -1,37 +1,28 @@
 # frozen_string_literal: true
 
-# main.rb
-require_relative './lib/models/parking'
-require_relative './lib/models/vehicle'
-require_relative './lib/utils'
+require 'open-uri'
+require 'launchy'
 
-LEVELS = 2
-ROWS_IN_LEVEL = 2
-PLACES_IN_ROW = 8
-QUEUE_MAX_SIZE = 10
+require_relative './gui/backend/gui_server'
+require_relative './parking/parking_1_queue'
 
 
-parking = Parking.new(LEVELS, ROWS_IN_LEVEL, PLACES_IN_ROW)
-queue = Queue.new
+logger = Logger.new(STDOUT)
 
+parking_with_1_queue = Parking1Queue.new(levels = 1,
+                            rows_in_level=5,
+                            places_in_row = 10,
+                            queue_max_size = 50,
+                            vehicles_arrive_hours_distribution = 0.1..0.2,
+                            leave_parking_hours_distribution = 7.5..8.5)
 
-loop do
-  if queue.size < QUEUE_MAX_SIZE
-    refused = parking.park_or_refuse(random_type_vehicle)
-  else
-    puts "Vehicle from the queue"
-    refused = parking.park_or_refuse(queue.pop)
-  end
+gui_server = GuiServer.new(parking = parking_with_1_queue,
+                           port = 51282,
+                           gui_path = "./gui/frontend/index.html")
+gui_server.open_browser
+gui_server.listen_and_serve
 
-  unless refused.nil?
-    puts "Vehicle #{refused.id} is in the queue. Queue length is #{queue.size}"
-    queue.push(refused)
-  end
-  break if quit?
-  sleep rand(0.1..1.0)
-end
+sleep(2) # wait while the browser is opening
 
-puts "quit"
-
-puts "Total money: #{parking.money}"
-puts "Total out times: #{parking.out_times}"
+# run the simulation
+parking_with_1_queue.run
