@@ -22,7 +22,9 @@ class Parking < Cashier
   end
 
   def park_or_refuse(vehicle)
-    # a comment here
+    if vehicle.nil?
+      return nil
+    end
     parking_place = find_parking_place(vehicle.size)
     if parking_place.nil?
       return refuse(vehicle)
@@ -35,13 +37,16 @@ class Parking < Cashier
   end
 
   def pay_and_exit(vehicle)
-    @money += vehicle.receipt.how_much_to_pay
-    @out_times << vehicle.receipt.out_time
-    clear_parking_space(vehicle)
-    @logger.info("#{YELLOW}#{vehicle.type} left after #{vehicle.receipt.parking_hours} hours. Money until now: #{@money.round(2)}#{RESET}")
+    @mutex.synchronize do
+      @money += vehicle.receipt.how_much_to_pay
+      @out_times << vehicle.receipt.out_time
+      clear_parking_space(vehicle)
+      @logger.info("#{YELLOW}#{vehicle.type} left after #{vehicle.receipt.parking_hours} hours. Money until now: #{@money}#{RESET}")
+    end
   end
 
   def snapshot
+    @mutex.synchronize do
       {
         'parking_space': @parking_space,
         'money': @money,
@@ -50,6 +55,7 @@ class Parking < Cashier
         'rows_in_level': @parking_space[0].length,
         'places_in_row': @parking_space[0][0].length,
       }
+    end
   end
 
   private
@@ -98,12 +104,8 @@ class Parking < Cashier
   end
 
   def clear_parking_space(vehicle)
-    @mutex.synchronize do
-      sleep(0.2)
       vehicle.receipt.parking_place.last.times do |i|
         @parking_space[vehicle.receipt.parking_place[0]][vehicle.receipt.parking_place[1]][vehicle.receipt.parking_place[2] - i] = nil
       end
-      sleep(0.2)
     end
-  end
 end

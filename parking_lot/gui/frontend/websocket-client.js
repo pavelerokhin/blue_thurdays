@@ -4,7 +4,7 @@ const queue = document.getElementById("queue");
 const money = document.getElementById("money");
 const vehicles = document.getElementById("vehicles");
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function (x) {
     const messagesDiv = document.getElementById("messages");
     const socket = new WebSocket("ws://localhost:51282");
 
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // add statistics
             // Check if properties exist before updating the inner text
             if (msg_parking && "money" in msg_parking) {
-                money.innerText = msg_parking["money"];
+                money.innerText = (Math.round(msg_parking["money"] * 100) / 100).toFixed(2);
             }
 
             if (msg_parking && "vehicles" in msg_parking) {
@@ -86,11 +86,13 @@ function getDisplay(message) {
 
 function getQueue(msg_queue) {
     const queueData = msg_queue["queue"];
+    const max_queue_size = msg_queue["max_size"];
+
     const queue_content = document.createElement('div');
     queue_content.classList.add('queue-content');
 
     if (!queueData) {
-        return getEmptyQueue();
+        return getEmptyQueue(max_queue_size);
     }
 
     for (let i=0; i < queueData.length; i++) {
@@ -98,17 +100,38 @@ function getQueue(msg_queue) {
         const place_in_queue = makeQueuePlace(vehicle, i)
         queue_content.appendChild(place_in_queue);
     }
+    if (queueData.length >= max_queue_size) {
+        return queue_content;
+    }
+
+    for (let i=queueData.length; i < max_queue_size; i++) {
+        const place_in_queue = getEmptyQueuePlace(i)
+        queue_content.appendChild(place_in_queue);
+    }
 
     return queue_content;
 }
 
-function getEmptyQueue() {
-    const queue = document.createElement('div');
-    queue.classList.add('queue');
-    queue.classList.add('empty');
-    queue.innerText = "Empty queue";
+function getEmptyQueue(max_queue_size) {
+    const empty_queue_content = document.createElement('div');
+    empty_queue_content.classList.add('queue-content');
 
-    return queue;
+    for (let i=0; i < max_queue_size; i++) {
+        const place_in_queue = getEmptyQueuePlace(i)
+        empty_queue_content.appendChild(place_in_queue);
+    }
+
+    return empty_queue_content;
+}
+
+function getEmptyQueuePlace(i) {
+    const place = document.createElement('div');
+    place.classList.add('queue-place');
+    place.classList.add('free');
+    place.innerText = "Pl. " + i;
+
+    return place;
+
 }
 
 function getStatistics(message) {

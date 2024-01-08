@@ -9,15 +9,53 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.left-dashboard {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0 10px;
+    height: 100vh;
+    width: 50%;
+}
+
+.right-dashboard {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 10px;
+    height: 100vh;
+    width: 50%;
+}
+
+.right-dashboard > div {
+    margin: 50px 0;
+}
+
 h1 {
     font-size: 2.5rem;
     font-weight: 500;
-    margin-bottom: 1rem;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.header {
+    align-items: center;
+    width: 100%;
 }
 
 .parking-lot {
     align-items: center;
-    border-bottom: 1px solid #000;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -33,6 +71,7 @@ h1 {
 .level-name {
     font-size: 1.5rem;
     font-weight: 500;
+    margin-top: 25px;
 }
 
 .row {
@@ -52,6 +91,7 @@ h1 {
     height: 50px;
     line-height: 50px;
     text-align: center;
+    text-overflow: ellipsis;
     width: 50px;
 }
 
