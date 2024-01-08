@@ -128,7 +128,7 @@ function getEmptyQueuePlace(i) {
     const place = document.createElement('div');
     place.classList.add('queue-place');
     place.classList.add('free');
-    place.innerText = "Pl. " + i;
+    place.innerText = "Pl. " + ++i;
 
     return place;
 

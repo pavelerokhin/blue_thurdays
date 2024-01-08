@@ -42,6 +42,7 @@ class Parking1Queue
       @logger.info("next time iteration of the outside world in #{wait_for_next_vehicle.round(2)} hours")
     end
 
+    sleep(2) # wait while the browser is opening
     display_statistics
   end
 

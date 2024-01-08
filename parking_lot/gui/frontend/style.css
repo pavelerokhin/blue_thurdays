@@ -41,7 +41,8 @@ body {
 h1 {
     font-size: 2.5rem;
     font-weight: 500;
-    margin-bottom: 10px;
+    text-align: center;
+    width: 100%;
 }
 
 h2 {
@@ -93,6 +94,13 @@ h2 {
     text-align: center;
     text-overflow: ellipsis;
     width: 50px;
+}
+
+.place:not(:first-child) {
+    border-left: none;
+}
+.queue-place {
+    margin: 1px;
 }
 
 .queue-content {
