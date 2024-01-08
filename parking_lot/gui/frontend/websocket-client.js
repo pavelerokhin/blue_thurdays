@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // add statistics
             // Check if properties exist before updating the inner text
             if (msg_parking && "money" in msg_parking) {
-                money.innerText = msg_parking["money"];
+                money.innerText = Math.round(msg_parking["money"], 2);
             }
 
             if (msg_parking && "vehicles" in msg_parking) {
