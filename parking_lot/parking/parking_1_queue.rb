@@ -27,7 +27,7 @@ class Parking1Queue
   def run
     loop do
       # vehicles coming from the outside world and enter the queue
-      unless @queue.push(random_type_vehicle(@leave_parking_hours_distribution))
+      unless @queue.push(random_type_vehicle_or_nothing(@leave_parking_hours_distribution))
         break
       end
       vehicle = @queue.pop
@@ -39,7 +39,7 @@ class Parking1Queue
 
       wait_for_next_vehicle = rand(@vehicles_arrive_hours_distribution)
       sleep wait_for_next_vehicle
-      @logger.info("next vehicle from the outside world arrived in #{wait_for_next_vehicle.round(2)} hours")
+      @logger.info("next time iteration of the outside world in #{wait_for_next_vehicle.round(2)} hours")
     end
 
     display_statistics
@@ -56,7 +56,7 @@ class Parking1Queue
 
   def display_statistics
     @logger.info("#{LIGHT_YELLOW}*******************************")
-    @logger.info(" - Total money: #{@parking_1_queue.money.round(2)}")
+    @logger.info(" - Total money: #{@parking_1_queue.money}")
     @logger.info(" - Vehicles served: #{@parking_1_queue.out_times.length}")
     @logger.info("*******************************#{RESET}")
 

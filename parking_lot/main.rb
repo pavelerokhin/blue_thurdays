@@ -9,12 +9,12 @@ require_relative './parking/parking_1_queue'
 
 logger = Logger.new(STDOUT)
 
-parking_with_1_queue = Parking1Queue.new(levels = 1,
+parking_with_1_queue = Parking1Queue.new(levels = 2,
                             rows_in_level=5,
-                            places_in_row = 10,
+                            places_in_row = 8,
                             queue_max_size = 50,
-                            vehicles_arrive_hours_distribution = 0.1..0.2,
-                            leave_parking_hours_distribution = 7.5..8.5)
+                            vehicles_arrive_hours_distribution = 0.1..0.15,
+                            leave_parking_hours_distribution = 9.5..11.5)
 
 gui_server = GuiServer.new(parking = parking_with_1_queue,
                            port = 51282,

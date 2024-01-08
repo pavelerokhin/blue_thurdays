@@ -12,10 +12,10 @@ class ParkingQueue
   def push(vehicle)
     @mutex.synchronize do
       if vehicle.nil?
-        return nil
+        return true
       end
 
-      @queue << vehicle
+      @queue.append(vehicle)
 
       if @queue.size == @max_size
         @logger.info("#{RED}QUEUE IS FULL. No more vehicles from the outside world are allowed.#{RESET}")
@@ -35,10 +35,12 @@ class ParkingQueue
   end
 
   def snapshot
-    {
-      'queue': @queue.empty? ? nil : @queue.map { |v| v.snapshot  },
-      'size': @queue.size,
-      'max_size': @max_size,
-    }
-  end
+    @mutex.synchronize do
+      {
+        'queue': @queue.empty? ? nil : @queue.map { |v| v.snapshot  },
+        'size': @queue.size,
+        'max_size': @max_size,
+      }
+      end
+    end
 end

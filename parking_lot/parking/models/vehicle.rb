@@ -79,6 +79,14 @@ class Bus < Vehicle
   end
 end
 
+def random_type_vehicle_or_nothing(leave_parking_hours_distribution)
+  if rand(0..1) == 0
+    nil
+  else
+    random_type_vehicle(leave_parking_hours_distribution)
+  end
+end
+
 def random_type_vehicle(leave_parking_hours_distribution)
   [Moto, Auto, Bus].sample.new(leave_parking_hours_distribution)
 end
