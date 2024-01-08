@@ -8,24 +8,26 @@
 </head>
 <body>
 <h1>Parking Lot Model</h1>
-<h2 class="header">Display</h2>
-<div id="display"></div>
-
-<h2 class="header">Queue</h2>
-<div id="queue"></div>
-
-<h2 class="header">Statistics</h2>
-<div id="statistics">
-    <div id="money-container">
-        <label>Money gained</label>
-        <span id="money"></span>
+<div class="container">
+    <div class="left-dashboard">
+        <div id="display"></div>
     </div>
-    <div id="vehicles-container">
-        <label>Vehicles served</label>
-        <span id="vehicles"></span>
+    <div class="right-dashboard">
+        <h2 class="header">Queue</h2>
+        <div id="queue"></div>
+        <h2 class="header">Statistics</h2>
+        <div id="statistics">
+            <div id="money-container">
+                <label>Money:</label>
+                <span id="money"></span>
+            </div>
+            <div id="vehicles-container">
+                <label>Vehicles:</label>
+                <span id="vehicles"></span>
+            </div>
+        </div>
     </div>
 </div>
-
 <script src="websocket-client.js"></script>
 </body>
 </html>

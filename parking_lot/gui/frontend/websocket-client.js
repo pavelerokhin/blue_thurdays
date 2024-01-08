@@ -4,7 +4,7 @@ const queue = document.getElementById("queue");
 const money = document.getElementById("money");
 const vehicles = document.getElementById("vehicles");
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function (x) {
     const messagesDiv = document.getElementById("messages");
     const socket = new WebSocket("ws://localhost:51282");
 
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // add statistics
             // Check if properties exist before updating the inner text
             if (msg_parking && "money" in msg_parking) {
-                money.innerText = Math.round(msg_parking["money"], 2);
+                money.innerText = (Math.round(msg_parking["money"] * 100) / 100).toFixed(2);
             }
 
             if (msg_parking && "vehicles" in msg_parking) {
