@@ -228,7 +228,7 @@ function makeQueuePlace(data, i) {
             break;
     }
 
-    place.innerText = "Pl. " + i;
+    place.innerText = "Pl. " + ++i;
 
     return place;
 }

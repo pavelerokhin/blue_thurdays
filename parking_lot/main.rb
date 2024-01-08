@@ -9,8 +9,8 @@ require_relative './parking/parking_1_queue'
 
 logger = Logger.new(STDOUT)
 
-parking_with_1_queue = Parking1Queue.new(levels = 1,
-                            rows_in_level=4,
+parking_with_1_queue = Parking1Queue.new(levels = 2,
+                            rows_in_level=5,
                             places_in_row = 9,
                             queue_max_size = 10,
                             vehicles_arrive_hours_distribution = 0.1..0.15,
