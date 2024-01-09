@@ -48,6 +48,7 @@ class Parking1Queue
 
   def snapshot
     {
+      'time': Time.now,
       'parking': @parking_1_queue.snapshot,
       'queue': @queue.snapshot,
     }

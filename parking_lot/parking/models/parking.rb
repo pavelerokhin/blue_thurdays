@@ -52,6 +52,7 @@ class Parking < Cashier
         'money': @money,
         'vehicles': @out_times.length,
         'levels': @parking_space.length,
+        'levels_saturation': parking_space_levels_saturation,
         'rows_in_level': @parking_space[0].length,
         'places_in_row': @parking_space[0][0].length,
       }
@@ -107,5 +108,14 @@ class Parking < Cashier
       vehicle.receipt.parking_place.last.times do |i|
         @parking_space[vehicle.receipt.parking_place[0]][vehicle.receipt.parking_place[1]][vehicle.receipt.parking_place[2] - i] = nil
       end
+  end
+
+  def parking_space_levels_saturation
+    @parking_space.map do |level|
+      occupied_spaces = level.flatten.count { |place| !place.nil? }
+      total_spaces = level.flatten.size
+      saturation = (occupied_spaces.to_f / total_spaces) * 100
+      saturation.round(2)
     end
+  end
 end

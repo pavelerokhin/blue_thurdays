@@ -11,13 +11,18 @@ document.addEventListener("DOMContentLoaded", function (x) {
     // Connection opened
     socket.addEventListener("open", function (event) {
         console.log("WebSocket connection opened");
-        sendMessage("Hello, WebSocket!");
+        setQueuePlot();
+        setPhaseDiagram();
     });
 
     // Listen for messages
     socket.addEventListener("message", function (event) {
         console.log("Message from server:", event.data);
-        displayMessage(event.data);
+        const message = JSON.parse(event.data);
+        data.push(message);
+        displayMessage(message);
+        updateQueuePlot(message);
+        updatePhaseDiagram(message);
     });
 
     // Connection closed
@@ -30,20 +35,11 @@ document.addEventListener("DOMContentLoaded", function (x) {
         console.error("WebSocket error:", event);
     });
 
-    // Function to send a message
-    function sendMessage(message) {
-        socket.send(message);
-    }
-
     // Function to display a message on the webpage
     function displayMessage(message) {
         try {
-            const msg = JSON.parse(message);
-
-            data.push(msg);
-
-            const msg_parking = msg["parking"];
-            const msg_queue = msg["queue"];
+            const msg_parking = message["parking"];
+            const msg_queue = message["queue"];
 
             const display_content = getDisplay(msg_parking);
             display.innerHTML = "";
@@ -131,21 +127,107 @@ function getEmptyQueuePlace(i) {
     place.innerText = "Pl. " + ++i;
 
     return place;
-
 }
 
-function getStatistics(message) {
-    const statisticsData = message["statistics"];
+function setQueuePlot(max_queue_size=10) {
+    const queuePlot = document.getElementById("queue-plot");
+    const data = [
+        {
+            x: [],
+            y: [],
+            mode: 'lines',
+            yaxis: 'queue size',
+            line: {
+                color: '#DF56F1',
+                size: 2,
+            }
+        }
+    ];
 
-    const statistics = document.createElement('div');
-    statistics.classList.add('statistics');
+    const layout = {
+        width: 'auto',  // Adjust the width as needed
+        height: 250, // Adjust the height as needed
+        xaxis: {
+            range: [0, 'auto']  // Set the x-axis to start from 0
+        },
+        yaxis: {
+            range: [0, max_queue_size]  // Set the y-axis to start from 0
+        },
+        margin: {
+            l: 10, // left margin
+            r: 1, // right margin
+            t: 1, // top margin
+            b: 20  // bottom margin
+        },
+    };
 
-    for (const key in statisticsData) {
-        const value = statisticsData[key];
-        statistics.appendChild(makeLabel('statistic', `${key}: ${value}`));
+    Plotly.newPlot(queuePlot, data, layout);
+}
+
+function updateQueuePlot(message) {
+    const msg_queue = message["queue"];
+    const msg_time = message["time"];
+    // parse time
+    const time = new Date(msg_time);
+
+    const queuePlot = document.getElementById("queue-plot");
+    const update = {
+        x: [[time]],
+        y: [[msg_queue["size"]]],
+    };
+
+    Plotly.extendTraces(queuePlot, update, [0]);
+}
+
+function setPhaseDiagram() {
+    const phasesDiagramPlot = document.getElementById("phases-diagram-plot");
+    const data = [
+        {
+            x: [],
+            y: [],
+            mode: 'lines',
+            xaxis: 'level 1 saturation',
+            yaxis: 'level 2 saturation',
+            line: {
+                color: 'rgba(255,0,0,0.8)' ,
+                width: 3
+            },
+        }
+    ];
+
+    const layout = {
+        width: 400,
+        height: 400,
+        margin: {
+            l: 50, // left margin
+            r: 50, // right margin
+            t: 50, // top margin
+            b: 50,  // bottom margin
+        },
+        xaxis: {
+            range: [0, 100]
+        },
+        yaxis: {
+            range: [0, 100]
+        },
     }
 
-    return statistics;
+    Plotly.newPlot(phasesDiagramPlot, data, layout);
+}
+
+function updatePhaseDiagram(message) {
+    const msg_saturation = message["parking"]["levels_saturation"];
+    const level_1_saturation = msg_saturation[0];
+    const level_2_saturation = msg_saturation[1];
+    const time = message["time"];
+
+    const phasesDiagramPlot = document.getElementById("phases-diagram-plot");
+    const update = {
+        x: [[level_1_saturation]],
+        y: [[level_2_saturation]],
+    };
+
+    Plotly.extendTraces(phasesDiagramPlot, update, [0]);
 }
 
 function makePlace(data) {
