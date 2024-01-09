@@ -7,29 +7,40 @@
     <link href="style.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
-<h1>Parking Lot Model</h1>
+<h1>Parking Lot</h1>
 <div class="container">
-    <div class="left-dashboard">
+    <div class="section">
         <div id="display"></div>
     </div>
-    <div class="right-dashboard">
-        <h2 class="header">Queue</h2>
-        <div id="queue"></div>
-        <div id="queue-plot"></div>
-        <div id="statistics">
-            <h2 class="header">Objectives</h2>
-            <div id="money-container">
-                <label>Money:</label>
-                <span id="money"></span>
-            </div>
-            <div id="vehicles-container">
-                <label>Vehicles:</label>
-                <span id="vehicles"></span>
-            </div>
+    <div class="section">
+        <div id="section">
+            <h2 class="header">Queue</h2>
+            <div id="queue"></div>
+            <div id="queue-plot"></div>
         </div>
-        <div id="phases-diagram">
-            <h2 class="header">Phase diagram</h2>
-            <div id="phases-diagram-plot"></div>
+        <div class="container">
+            <div id="objectives" class="section">
+                <h2 class="header">Metrics</h2>
+                <div id="time-container">
+                    <span>Time:</span>
+                    <span id="time">0</span>
+                    h
+                </div>
+                <div id="money-container">
+                    <span>Money:</span>
+                    <span id="money"></span>
+                    $
+                </div>
+                <div id="vehicles-container">
+                    <span>Vehicles served:</span>
+                    <span id="vehicles"></span>
+                </div>
+            </div>
+            <div id="phases-diagram" class="section">
+                <h2 class="header">Parking lot first 2 levels saturation</h2>
+                <h3 class="header">phase diagram</h3>
+                <div id="phases-diagram-plot"></div>
+            </div>
         </div>
     </div>
 </div>

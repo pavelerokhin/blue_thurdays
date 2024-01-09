@@ -3,6 +3,8 @@ const display = document.getElementById("display");
 const queue = document.getElementById("queue");
 const money = document.getElementById("money");
 const vehicles = document.getElementById("vehicles");
+const time = document.getElementById("time");
+
 
 document.addEventListener("DOMContentLoaded", function (x) {
     const messagesDiv = document.getElementById("messages");
@@ -28,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function (x) {
     // Connection closed
     socket.addEventListener("close", function (event) {
         console.log("WebSocket connection closed");
+        finalPointPhaseDiagram();
     });
 
     // Connection error
@@ -40,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function (x) {
         try {
             const msg_parking = message["parking"];
             const msg_queue = message["queue"];
+            const msg_time = message["time"];
 
             const display_content = getDisplay(msg_parking);
             display.innerHTML = "";
@@ -58,6 +62,15 @@ document.addEventListener("DOMContentLoaded", function (x) {
             if (msg_parking && "vehicles" in msg_parking) {
                 vehicles.innerText = msg_parking["vehicles"];
             }
+
+            if (msg_time) {
+                const messageTime = new Date(msg_time);
+                const t0 = new Date(data[0]["time"]);
+
+                const differenceInMilliseconds =  messageTime - t0;
+                time.innerText = Math.floor(differenceInMilliseconds / 1000);
+            }
+            
         } catch (error) {
             console.error("Error displaying message:", error);
             // Handle the error appropriately, e.g., show an error message to the user
@@ -145,7 +158,6 @@ function setQueuePlot(max_queue_size=10) {
     ];
 
     const layout = {
-        width: 'auto',  // Adjust the width as needed
         height: 250, // Adjust the height as needed
         xaxis: {
             range: [0, 'auto']  // Set the x-axis to start from 0
@@ -161,12 +173,15 @@ function setQueuePlot(max_queue_size=10) {
         },
     };
 
-    Plotly.newPlot(queuePlot, data, layout);
+    const config = {responsive: true}
+
+    Plotly.newPlot(queuePlot, data, layout, config);
 }
 
 function updateQueuePlot(message) {
     const msg_queue = message["queue"];
     const msg_time = message["time"];
+
     // parse time
     const time = new Date(msg_time);
 
@@ -175,7 +190,11 @@ function updateQueuePlot(message) {
         x: [[time]],
         y: [[msg_queue["size"]]],
     };
-
+    Plotly.relayout(queuePlot, {
+        yaxis: {
+            range: [0, msg_queue["max_size"]]
+        },
+    });
     Plotly.extendTraces(queuePlot, update, [0]);
 }
 
@@ -185,13 +204,14 @@ function setPhaseDiagram() {
         {
             x: [],
             y: [],
-            mode: 'lines',
+            mode: 'lines+markers',
             xaxis: 'level 1 saturation',
             yaxis: 'level 2 saturation',
             line: {
                 color: 'rgba(255,0,0,0.8)' ,
                 width: 3
             },
+            name: 'saturation',
         }
     ];
 
@@ -200,7 +220,7 @@ function setPhaseDiagram() {
         height: 400,
         margin: {
             l: 50, // left margin
-            r: 50, // right margin
+            r: 70, // right margin
             t: 50, // top margin
             b: 50,  // bottom margin
         },
@@ -218,7 +238,10 @@ function setPhaseDiagram() {
 function updatePhaseDiagram(message) {
     const msg_saturation = message["parking"]["levels_saturation"];
     const level_1_saturation = msg_saturation[0];
-    const level_2_saturation = msg_saturation[1];
+    let level_2_saturation = 0;
+    if (msg_saturation.length >= 2) {
+        level_2_saturation = msg_saturation[1];
+    }
     const time = message["time"];
 
     const phasesDiagramPlot = document.getElementById("phases-diagram-plot");
@@ -228,6 +251,30 @@ function updatePhaseDiagram(message) {
     };
 
     Plotly.extendTraces(phasesDiagramPlot, update, [0]);
+}
+
+function finalPointPhaseDiagram() {
+    const msg_saturation = data[data.length-1]["parking"]["levels_saturation"];
+    debugger;
+    const level_1_saturation = msg_saturation[0];
+    let level_2_saturation = 0;
+    if (msg_saturation.length >= 2) {
+        level_2_saturation = msg_saturation[1];
+    }
+
+    const finalMarker = {
+        x: [level_1_saturation],
+        y: [level_2_saturation],
+        mode: 'markers',
+        marker: {
+            size: 10, 
+            color: 'green' 
+        },
+        name: 'final phase',
+    };
+
+    Plotly.addTraces('phases-diagram-plot', finalMarker);
+
 }
 
 function makePlace(data) {
