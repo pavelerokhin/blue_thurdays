@@ -137,7 +137,10 @@ function setQueuePlot(max_queue_size=10) {
             y: [],
             mode: 'lines',
             yaxis: 'queue size',
-            line: {color: '#DF56F1'}
+            line: {
+                color: '#DF56F1',
+                size: 2,
+            }
         }
     ];
 
@@ -186,25 +189,26 @@ function setPhaseDiagram() {
             xaxis: 'level 1 saturation',
             yaxis: 'level 2 saturation',
             line: {
-                color: '#000000' ,
-                opacity: 0.5,
-                width: 1,
+                color: 'rgba(255,0,0,0.8)' ,
+                width: 3
             },
-            text: [],  // This will hold the timestamps
-            marker: {
-                size: 5,
-            }
         }
     ];
 
     const layout = {
-        width: 500,
-        height: 500,
+        width: 400,
+        height: 400,
+        margin: {
+            l: 50, // left margin
+            r: 50, // right margin
+            t: 50, // top margin
+            b: 50,  // bottom margin
+        },
         xaxis: {
-            range: [0, 1]
+            range: [0, 100]
         },
         yaxis: {
-            range: [0, 1]
+            range: [0, 100]
         },
     }
 
@@ -221,7 +225,6 @@ function updatePhaseDiagram(message) {
     const update = {
         x: [[level_1_saturation]],
         y: [[level_2_saturation]],
-        text: [[time]],
     };
 
     Plotly.extendTraces(phasesDiagramPlot, update, [0]);
