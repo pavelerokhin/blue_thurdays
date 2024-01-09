@@ -9,35 +9,6 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
-.container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.left-dashboard {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 0 10px;
-    height: 100vh;
-    width: 50%;
-}
-
-.right-dashboard {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 0 10px;
-    height: 100vh;
-    width: 50%;
-}
-
-.right-dashboard > div {
-    margin: 50px 0;
-}
-
 h1 {
     font-size: 2.5rem;
     font-weight: 500;
@@ -48,6 +19,37 @@ h1 {
 h2 {
     font-size: 1.5rem;
     font-weight: 500;
+}
+
+#statistics {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 50px 0;
+}
+
+#queue-plot {
+    margin: 25px 0;
+}
+
+.left-dashboard, .right-dashboard {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 10px;
+    height: 100vh;
+    width: 50%;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.display {
+    margin: auto;
 }
 
 .header {
@@ -99,6 +101,7 @@ h2 {
 .place:not(:first-child) {
     border-left: none;
 }
+
 .queue-place {
     margin: 1px;
 }

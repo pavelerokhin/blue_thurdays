@@ -15,8 +15,9 @@
     <div class="right-dashboard">
         <h2 class="header">Queue</h2>
         <div id="queue"></div>
-        <h2 class="header">Statistics</h2>
+        <div id="queue-plot"></div>
         <div id="statistics">
+            <h2 class="header">Objectives</h2>
             <div id="money-container">
                 <label>Money:</label>
                 <span id="money"></span>
@@ -26,8 +27,13 @@
                 <span id="vehicles"></span>
             </div>
         </div>
+        <div id="phases-diagram">
+            <h2 class="header">Phases diagram</h2>
+            <div id="phases-diagram-plot"></div>
+        </div>
     </div>
 </div>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
 <script src="websocket-client.js"></script>
 </body>
 </html>
